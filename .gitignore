@@ -1,0 +1,11 @@
+# ignore editor stuff
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# os files
+.DS_Store
+Thumbs.db
+
