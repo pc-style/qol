@@ -13,8 +13,8 @@
 // @require      https://unpkg.com/turndown/dist/turndown.js
 // @require      https://unpkg.com/turndown-plugin-gfm/dist/turndown-plugin-gfm.js
 // @require      https://cdn.jsdelivr.net/gh/mozilla/readability@master/Readability.js
-// @downloadURL  https://raw.githubusercontent.com/adam0/markdown-converter-userscript/main/markdown-converter.user.js
-// @updateURL    https://raw.githubusercontent.com/adam0/markdown-converter-userscript/main/markdown-converter.user.js
+// @downloadURL  https://raw.githubusercontent.com/pc-style/markdown-converter-userscript/main/markdown-converter.user.js
+// @updateURL    https://raw.githubusercontent.com/pc-style/markdown-converter-userscript/main/markdown-converter.user.js
 // ==/UserScript==
 
 (function() {
