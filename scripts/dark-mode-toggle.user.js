@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dark Mode Toggle
 // @namespace    dark-mode-toggle
-// @version      1.0.3
+// @version      1.0.4
 // @description  Hybrid dark mode with smart CSS injection and filter fallback, per-site overrides
 // @match        *://*/*
 // @grant        GM_addStyle

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QoL Framework
 // @namespace    qol-framework
-// @version      1.0.2
+// @version      1.0.3
 // @description  Quality of Life userscript framework
 // @match        *://*/*
 // @grant        GM_getValue
