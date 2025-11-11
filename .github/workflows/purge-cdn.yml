@@ -16,7 +16,7 @@ jobs:
       - name: Purge jsdelivr cache
         uses: egad13/purge-jsdelivr-cache@v1
         with:
-          urls: |
+          url: |
             https://cdn.jsdelivr.net/gh/pc-style/qol@latest/dist/qol-framework.user.js
             https://cdn.jsdelivr.net/gh/pc-style/qol@latest/scripts/dark-mode-toggle.user.js
             https://cdn.jsdelivr.net/gh/pc-style/qol@latest/scripts/custom-shortcuts-manager.user.js
