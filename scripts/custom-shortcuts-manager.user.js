@@ -10,7 +10,9 @@
 // @grant        GM_setClipboard
 // @grant        GM_registerMenuCommand
 // @grant        GM_openInTab
-// @require      https://raw.githubusercontent.com/pc-style/qol/main/dist/qol-framework.user.js
+// @require      https://cdn.jsdelivr.net/gh/pc-style/qol@main/dist/qol-framework.user.js
+// @updateURL    https://cdn.jsdelivr.net/gh/pc-style/qol@main/scripts/custom-shortcuts-manager.user.js
+// @downloadURL  https://cdn.jsdelivr.net/gh/pc-style/qol@main/scripts/custom-shortcuts-manager.user.js
 // @run-at       document-start
 // ==/UserScript==
 

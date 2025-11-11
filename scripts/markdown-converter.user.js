@@ -10,13 +10,10 @@
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @connect      tampermonkey.net
-// @require      https://raw.githubusercontent.com/pc-style/qol/main/dist/qol-framework.user.js
-// @downloadURL  https://raw.githubusercontent.com/pc-style/markdown-converter-userscript/main/markdown-converter.user.js
-// @updateURL    http://localhost:8123/markdown-converter.user.js
+// @require      https://cdn.jsdelivr.net/gh/pc-style/qol@main/dist/qol-framework.user.js
+// @updateURL    https://cdn.jsdelivr.net/gh/pc-style/qol@main/scripts/markdown-converter.user.js
+// @downloadURL  https://cdn.jsdelivr.net/gh/pc-style/qol@main/scripts/markdown-converter.user.js
 // ==/UserScript==
-
-
-// prod:// @updateURL    https://raw.githubusercontent.com/pc-style/markdown-converter-userscript/main/markdown-converter.user.js
 
 
 (function() {
