@@ -8,7 +8,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
-// @require      https://raw.githubusercontent.com/pc-style/qol/main/dist/qol-framework.user.js
+// @require      https://cdn.jsdelivr.net/gh/pc-style/qol@main/dist/qol-framework.user.js
 // @run-at       document-start
 // ==/UserScript==
 
@@ -16,18 +16,37 @@
   'use strict';
 
   // wait for framework to load
-  function waitForQoL(callback, maxAttempts = 50) {
-    if (typeof QoL !== 'undefined' && QoL.registerScript) {
+  function waitForQoL(callback, maxAttempts = 100) {
+    // check all possible locations for QoL
+    let qol = null;
+    
+    if (typeof QoL !== 'undefined') {
+      qol = QoL;
+    } else if (typeof window !== 'undefined' && window.QoL) {
+      qol = window.QoL;
+    } else if (typeof globalThis !== 'undefined' && globalThis.QoL) {
+      qol = globalThis.QoL;
+    } else if (typeof self !== 'undefined' && self.QoL) {
+      qol = self.QoL;
+    }
+    
+    if (qol && typeof qol.registerScript === 'function') {
+      // ensure QoL is available globally for this script
+      if (typeof QoL === 'undefined') {
+        if (typeof window !== 'undefined') window.QoL = qol;
+        if (typeof globalThis !== 'undefined') globalThis.QoL = qol;
+        if (typeof self !== 'undefined') self.QoL = qol;
+      }
       callback();
       return;
     }
     
     if (maxAttempts <= 0) {
-      console.error('[dark-mode-toggle] QoL framework not loaded after timeout');
+      console.error('[dark-mode-toggle] QoL framework not loaded after timeout. Check that the framework script is installed and @require URL is correct.');
       return;
     }
     
-    setTimeout(() => waitForQoL(callback, maxAttempts - 1), 100);
+    setTimeout(() => waitForQoL(callback, maxAttempts - 1), 50);
   }
   
   waitForQoL(() => {
