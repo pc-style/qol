@@ -10,7 +10,14 @@ const state = {
   toast: null,
   toastTimer: null,
   scripts: new Map(), // scriptId -> config
-  currentScriptTab: null
+  currentScriptTab: null,
+  commandPalette: null,
+  commandPaletteInput: null,
+  commandPaletteList: null,
+  commandPaletteOpen: false,
+  commandPaletteCommands: [],
+  commandPaletteFiltered: [],
+  commandPaletteSelected: 0
 };
 
 // inject styles
@@ -332,6 +339,279 @@ export const Modal = {
   }
 };
 
+// Command Palette
+export const CommandPalette = {
+  init() {
+    ensureStyles();
+    ready(() => {
+      this.ensure();
+      this.setupHotkey();
+    });
+  },
+
+  ensure() {
+    if (state.commandPalette || !document.body) return;
+    
+    const palette = document.createElement('div');
+    palette.id = 'qol-command-palette';
+    palette.dataset.qolUi = 'command-palette';
+    palette.setAttribute('role', 'dialog');
+    palette.setAttribute('aria-modal', 'true');
+    palette.setAttribute('aria-label', 'Command Palette');
+    
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'qol-command-palette-input';
+    input.setAttribute('placeholder', 'Type to search commands...');
+    input.setAttribute('aria-label', 'Command search');
+    
+    const list = document.createElement('div');
+    list.id = 'qol-command-palette-list';
+    list.setAttribute('role', 'listbox');
+    
+    palette.appendChild(input);
+    palette.appendChild(list);
+    document.body.appendChild(palette);
+    
+    state.commandPalette = palette;
+    state.commandPaletteInput = input;
+    state.commandPaletteList = list;
+    
+    // event handlers
+    input.addEventListener('input', () => this.filter());
+    input.addEventListener('keydown', (e) => this.handleKeyDown(e));
+    palette.addEventListener('click', (e) => {
+      if (e.target === palette) this.close();
+    });
+  },
+
+  setupHotkey() {
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+K or Cmd+K
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k' && !e.shiftKey) {
+        // don't trigger if in input/textarea
+        const tag = e.target?.tagName;
+        if (tag && ['INPUT', 'TEXTAREA'].includes(tag)) {
+          // only if not typing in a text input
+          if (e.target.type === 'text' || e.target.type === 'search') {
+            return;
+          }
+        }
+        e.preventDefault();
+        this.toggle();
+      }
+      // Escape to close
+      if (e.key === 'Escape' && state.commandPaletteOpen) {
+        e.preventDefault();
+        this.close();
+      }
+    }, true);
+  },
+
+  collectCommands() {
+    const commands = [];
+    
+    // add script toggle commands
+    for (const script of state.scripts.values()) {
+      commands.push({
+        id: `toggle-${script.id}`,
+        label: `${script.enabled ? 'Disable' : 'Enable'} ${script.name}`,
+        category: 'Scripts',
+        action: () => {
+          script.enabled = !script.enabled;
+          script.onToggle?.(script.enabled);
+          Toolbar.update();
+          this.close();
+        }
+      });
+      
+      // add script settings command
+      if (script.settings && Object.keys(script.settings).length > 0) {
+        commands.push({
+          id: `settings-${script.id}`,
+          label: `Open ${script.name} Settings`,
+          category: 'Scripts',
+          action: () => {
+            Modal.open(script.id);
+            this.close();
+          }
+        });
+      }
+      
+      // add custom commands from script
+      if (script.commands && Array.isArray(script.commands)) {
+        for (const cmd of script.commands) {
+          commands.push({
+            ...cmd,
+            category: cmd.category || script.name,
+            action: () => {
+              cmd.action?.();
+              this.close();
+            }
+          });
+        }
+      }
+    }
+    
+    // add global commands
+    commands.push({
+      id: 'settings-all',
+      label: 'Open Settings',
+      category: 'General',
+      action: () => {
+        Modal.open();
+        this.close();
+      }
+    });
+    
+    state.commandPaletteCommands = commands;
+    return commands;
+  },
+
+  filter() {
+    const query = state.commandPaletteInput.value.toLowerCase().trim();
+    
+    if (!query) {
+      state.commandPaletteFiltered = state.commandPaletteCommands;
+    } else {
+      state.commandPaletteFiltered = state.commandPaletteCommands.filter(cmd => {
+        const searchText = `${cmd.label} ${cmd.category}`.toLowerCase();
+        return searchText.includes(query);
+      });
+    }
+    
+    state.commandPaletteSelected = 0;
+    this.render();
+  },
+
+  render() {
+    if (!state.commandPaletteList) return;
+    
+    if (state.commandPaletteFiltered.length === 0) {
+      state.commandPaletteList.innerHTML = '<div class="qol-command-empty">No commands found</div>';
+      return;
+    }
+    
+    // group by category
+    const grouped = {};
+    for (const cmd of state.commandPaletteFiltered) {
+      if (!grouped[cmd.category]) {
+        grouped[cmd.category] = [];
+      }
+      grouped[cmd.category].push(cmd);
+    }
+    
+    let html = '';
+    for (const [category, cmds] of Object.entries(grouped)) {
+      html += `<div class="qol-command-category">${escapeHtml(category)}</div>`;
+      for (let i = 0; i < cmds.length; i++) {
+        const cmd = cmds[i];
+        const globalIndex = state.commandPaletteFiltered.indexOf(cmd);
+        const selected = globalIndex === state.commandPaletteSelected ? 'selected' : '';
+        html += `
+          <div class="qol-command-item ${selected}" data-index="${globalIndex}" data-command-id="${escapeHtml(cmd.id)}">
+            <span class="qol-command-label">${escapeHtml(cmd.label)}</span>
+          </div>
+        `;
+      }
+    }
+    
+    state.commandPaletteList.innerHTML = html;
+    
+    // attach click handlers
+    state.commandPaletteList.querySelectorAll('.qol-command-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const index = parseInt(item.dataset.index);
+        this.execute(index);
+      });
+    });
+    
+    // scroll selected into view
+    const selectedEl = state.commandPaletteList.querySelector('.qol-command-item.selected');
+    if (selectedEl) {
+      selectedEl.scrollIntoView({ block: 'nearest' });
+    }
+  },
+
+  handleKeyDown(e) {
+    if (!state.commandPaletteOpen) return;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        state.commandPaletteSelected = Math.min(
+          state.commandPaletteSelected + 1,
+          state.commandPaletteFiltered.length - 1
+        );
+        this.render();
+        break;
+        
+      case 'ArrowUp':
+        e.preventDefault();
+        state.commandPaletteSelected = Math.max(state.commandPaletteSelected - 1, 0);
+        this.render();
+        break;
+        
+      case 'Enter':
+        e.preventDefault();
+        this.execute(state.commandPaletteSelected);
+        break;
+        
+      case 'Escape':
+        e.preventDefault();
+        this.close();
+        break;
+    }
+  },
+
+  execute(index) {
+    const cmd = state.commandPaletteFiltered[index];
+    if (cmd && cmd.action) {
+      cmd.action();
+    }
+  },
+
+  open() {
+    this.ensure();
+    if (!state.commandPalette) return;
+    
+    this.collectCommands();
+    state.commandPaletteFiltered = state.commandPaletteCommands;
+    state.commandPaletteSelected = 0;
+    state.commandPaletteOpen = true;
+    
+    this.render();
+    state.commandPalette.classList.add('show');
+    
+    // focus input
+    setTimeout(() => {
+      if (state.commandPaletteInput) {
+        state.commandPaletteInput.focus();
+        state.commandPaletteInput.select();
+      }
+    }, 50);
+  },
+
+  close() {
+    if (!state.commandPalette) return;
+    
+    state.commandPaletteOpen = false;
+    state.commandPalette.classList.remove('show');
+    
+    if (state.commandPaletteInput) {
+      state.commandPaletteInput.value = '';
+    }
+  },
+
+  toggle() {
+    if (state.commandPaletteOpen) {
+      this.close();
+    } else {
+      this.open();
+    }
+  }
+};
+
 // Toast
 export const Toast = {
   init() {
@@ -371,11 +651,13 @@ export const UI = {
   Toolbar,
   Modal,
   Toast,
+  CommandPalette,
   
   init() {
     Toolbar.init();
     Modal.init();
     Toast.init();
+    CommandPalette.init();
   },
   
   registerScript(script) {

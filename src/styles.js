@@ -259,5 +259,104 @@ export const STYLES = `
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+/* Command Palette */
+#qol-command-palette {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(600px, calc(100% - 32px));
+  max-height: min(500px, calc(100vh - 100px));
+  background: var(--qol-bg-solid);
+  border: 1px solid var(--qol-border);
+  border-radius: var(--qol-radius-lg);
+  box-shadow: 0 35px 90px rgba(15, 42, 70, 0.8);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(-20px) scale(0.95);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: calc(var(--qol-z) + 1);
+  pointer-events: none;
+}
+
+#qol-command-palette.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+#qol-command-palette-input {
+  width: 100%;
+  padding: 16px 20px;
+  font-size: 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--qol-border-soft);
+  color: var(--qol-text);
+  outline: none;
+  font-family: inherit;
+}
+
+#qol-command-palette-input::placeholder {
+  color: var(--qol-text-soft);
+}
+
+#qol-command-palette-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  max-height: 400px;
+}
+
+.qol-command-category {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--qol-text-soft);
+  margin-top: 8px;
+}
+
+.qol-command-category:first-child {
+  margin-top: 0;
+}
+
+.qol-command-item {
+  padding: 10px 12px;
+  border-radius: var(--qol-radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qol-command-item:hover,
+.qol-command-item.selected {
+  background: var(--qol-bg-soft);
+}
+
+.qol-command-item.selected {
+  background: var(--qol-accent-soft);
+}
+
+.qol-command-label {
+  color: var(--qol-text);
+  font-size: 14px;
+}
+
+.qol-command-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--qol-text-soft);
+  font-size: 14px;
+}
+
+/* Ensure command palette isn't affected by dark mode filters */
+#qol-command-palette {
+  filter: none !important;
+}
 `;
 

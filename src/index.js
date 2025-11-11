@@ -28,6 +28,7 @@ function registerScript(config) {
     version = '1.0.0',
     enabled = true,
     settings = {},
+    commands = [], // custom commands for command palette
     init: initFn,
     destroy: destroyFn
   } = config;
@@ -83,6 +84,9 @@ function registerScript(config) {
     // lifecycle
     init: initFn,
     destroy: destroyFn,
+    
+    // command palette commands
+    commands,
     
     // toggle handler
     onToggle(enabled) {
@@ -173,9 +177,17 @@ const QoL = {
   deps: Deps
 };
 
-// expose globally
+// expose globally immediately (before DOM ready)
 if (typeof window !== 'undefined') {
   window.QoL = QoL;
+}
+// also expose as global for userscript context
+if (typeof globalThis !== 'undefined') {
+  globalThis.QoL = QoL;
+}
+// fallback for older environments
+if (typeof self !== 'undefined') {
+  self.QoL = QoL;
 }
 
 // initialize when DOM is ready
