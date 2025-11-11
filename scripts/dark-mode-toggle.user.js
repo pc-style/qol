@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dark Mode Toggle
 // @namespace    dark-mode-toggle
-// @version      1.0.2
+// @version      1.0.3
 // @description  Hybrid dark mode with smart CSS injection and filter fallback, per-site overrides
 // @match        *://*/*
 // @grant        GM_addStyle
@@ -9,8 +9,8 @@
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @require      https://cdn.jsdelivr.net/gh/pc-style/qol@main/dist/qol-framework.user.js
-// @updateURL    https://raw.githubusercontent.com/pc-style/qol/main/scripts/dark-mode-toggle.user.js
-// @downloadURL  https://raw.githubusercontent.com/pc-style/qol/main/scripts/dark-mode-toggle.user.js
+// @updateURL    https://cdn.jsdelivr.net/gh/pc-style/qol@main/scripts/dark-mode-toggle.user.js
+// @downloadURL  https://cdn.jsdelivr.net/gh/pc-style/qol@main/scripts/dark-mode-toggle.user.js
 // @run-at       document-start
 // ==/UserScript==
 
