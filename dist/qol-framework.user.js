@@ -803,7 +803,7 @@ var QoLFramework = (() => {
       "id": "dark-mode-toggle",
       "name": "Dark Mode Toggle",
       "description": "Hybrid dark mode with smart CSS injection and filter fallback, per-site overrides",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "enabled": true
     },
     {
