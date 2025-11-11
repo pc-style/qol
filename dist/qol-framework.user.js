@@ -950,6 +950,12 @@ var QoLFramework = (() => {
   if (typeof window !== "undefined") {
     window.QoL = QoL;
   }
+  if (typeof globalThis !== "undefined") {
+    globalThis.QoL = QoL;
+  }
+  if (typeof self !== "undefined") {
+    self.QoL = QoL;
+  }
   ready(init);
   var src_default = QoL;
   return __toCommonJS(src_exports);
