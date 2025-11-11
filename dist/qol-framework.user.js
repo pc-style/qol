@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         QoL Framework
 // @namespace    qol-framework
-// @version      1.0.1
+// @version      1.0.2
 // @description  Quality of Life userscript framework
 // @match        *://*/*
 // @grant        GM_getValue
@@ -13,8 +13,8 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_listValues
 // @grant        GM_deleteValue
-// @updateURL    https://raw.githubusercontent.com/pc-style/qol/main/dist/qol-framework.user.js
-// @downloadURL  https://raw.githubusercontent.com/pc-style/qol/main/dist/qol-framework.user.js
+// @updateURL    https://cdn.jsdelivr.net/gh/pc-style/qol@main/dist/qol-framework.user.js
+// @downloadURL  https://cdn.jsdelivr.net/gh/pc-style/qol@main/dist/qol-framework.user.js
 // @run-at       document-start
 // ==/UserScript==
 
