@@ -39,8 +39,6 @@ const FRAMEWORK_HEADER = `// ==UserScript==
 // ==/UserScript==
 
 `;
-<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>
-run_terminal_cmd
 
 async function buildFramework() {
   console.log('Building framework...');
