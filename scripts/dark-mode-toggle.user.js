@@ -8,9 +8,9 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
-// @require      https://cdn.jsdelivr.net/gh/pc-style/qol@main/dist/qol-framework.user.js
-// @updateURL    https://cdn.jsdelivr.net/gh/pc-style/qol@main/scripts/dark-mode-toggle.user.js
-// @downloadURL  https://cdn.jsdelivr.net/gh/pc-style/qol@main/scripts/dark-mode-toggle.user.js
+// @require      https://cdn.jsdelivr.net/gh/pc-style/qol@latest/dist/qol-framework.user.js
+// @updateURL    https://cdn.jsdelivr.net/gh/pc-style/qol@latest/scripts/dark-mode-toggle.user.js
+// @downloadURL  https://cdn.jsdelivr.net/gh/pc-style/qol@latest/scripts/dark-mode-toggle.user.js
 // @run-at       document-start
 // ==/UserScript==
 
