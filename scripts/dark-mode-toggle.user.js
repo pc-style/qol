@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Dark Mode Toggle
 // @namespace    dark-mode-toggle
-// @version      1.0.0
+// @version      1.0.1
 // @description  Hybrid dark mode with smart CSS injection and filter fallback, per-site overrides
 // @match        *://*/*
 // @grant        GM_addStyle
@@ -9,6 +9,8 @@
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @require      https://cdn.jsdelivr.net/gh/pc-style/qol@main/dist/qol-framework.user.js
+// @updateURL    https://raw.githubusercontent.com/pc-style/qol/main/scripts/dark-mode-toggle.user.js
+// @downloadURL  https://raw.githubusercontent.com/pc-style/qol/main/scripts/dark-mode-toggle.user.js
 // @run-at       document-start
 // ==/UserScript==
 
@@ -328,32 +330,48 @@
   // resolve which mode to use
   function resolveMode() {
     const settings = state.settings;
-    if (!settings) return { mode: MODES.OFF };
+    if (!settings) {
+      console.debug('[dark-mode-toggle] resolveMode: no settings');
+      return { mode: MODES.OFF };
+    }
 
     // check site override first
     const override = getSiteOverride(state.host);
     if (override) {
+      console.debug('[dark-mode-toggle] resolveMode: using site override', override);
       return { mode: override.mode };
     }
 
     // check if excluded
     if (isUrlExcluded()) {
+      console.debug('[dark-mode-toggle] resolveMode: URL excluded');
       return { mode: MODES.OFF };
     }
 
     // check if disabled
     if (!settings.enabled) {
+      console.debug('[dark-mode-toggle] resolveMode: disabled');
       return { mode: MODES.OFF };
     }
 
     // check native dark mode detection
-    if (settings.respectNativeDark && detectExistingDarkMode()) {
-      state.autoDisabled = true;
-      return { mode: MODES.OFF };
+    if (settings.respectNativeDark) {
+      const detected = detectExistingDarkMode();
+      console.debug('[dark-mode-toggle] resolveMode: native dark check', {
+        detected,
+        hasDataDmt: document.documentElement.hasAttribute('data-dmt-mode')
+      });
+      if (detected) {
+        state.autoDisabled = true;
+        console.debug('[dark-mode-toggle] resolveMode: native dark detected, auto-disabling');
+        return { mode: MODES.OFF };
+      }
     }
 
     state.autoDisabled = false;
-    return { mode: settings.defaultMode || MODES.SMART };
+    const mode = settings.defaultMode || MODES.SMART;
+    console.debug('[dark-mode-toggle] resolveMode: using default mode', mode);
+    return { mode };
   }
 
   function getSiteOverride(host) {
@@ -389,25 +407,66 @@
     const root = doc.documentElement;
     const body = doc.body || root;
     
-    if (!body || !root) return false;
+    if (!body || !root) {
+      console.debug('[dark-mode-toggle] detectExistingDarkMode: no body/root');
+      return false;
+    }
     
-    // check for dark mode hints
-    if (root.classList.contains('dark') || root.dataset.theme === 'dark') {
+    // don't detect if we already applied dark mode
+    if (root.hasAttribute('data-dmt-mode')) {
+      console.debug('[dark-mode-toggle] detectExistingDarkMode: already has data-dmt-mode, skipping');
+      return false;
+    }
+    
+    // check for dark mode hints (only on root, not body)
+    const hasDarkClass = root.classList.contains('dark');
+    const hasDarkTheme = root.dataset.theme === 'dark';
+    if (hasDarkClass || hasDarkTheme) {
+      console.debug('[dark-mode-toggle] detectExistingDarkMode: found dark hints', { hasDarkClass, hasDarkTheme });
       return true;
     }
     
-    // check computed styles
+    // check computed styles - but only if body has original styling
+    // if body background was changed by our script, ignore
     const style = doc.defaultView?.getComputedStyle(body);
-    if (!style) return false;
+    if (!style) {
+      console.debug('[dark-mode-toggle] detectExistingDarkMode: no computed style');
+      return false;
+    }
     
-    const bgLum = getLuminanceFromCssColor(style.backgroundColor);
+    // check if background color looks like it was set by our script
+    const bgColor = style.backgroundColor;
+    const bgLum = getLuminanceFromCssColor(bgColor);
     const textLum = getLuminanceFromCssColor(style.color);
     
-    if (bgLum === null || textLum === null) return false;
+    if (bgLum === null || textLum === null) {
+      console.debug('[dark-mode-toggle] detectExistingDarkMode: invalid luminance', { bgColor, bgLum, textLum });
+      return false;
+    }
     
-    // dark if background is dark and contrast is good
+    // only detect if body has a very dark background AND it's not from our script
+    // be more conservative - only detect if it's clearly a dark theme site
+    // (very dark background < 0.2, not just slightly dark)
     const contrast = (Math.max(bgLum, textLum) + 0.05) / (Math.min(bgLum, textLum) + 0.05);
-    return bgLum < 0.3 && contrast > 3;
+    
+    // more strict: very dark background (< 0.2) with good contrast (> 4)
+    // and also check that text is light (textLum > bgLum)
+    const detected = bgLum < 0.2 && contrast > 4 && textLum > bgLum;
+    
+    console.debug('[dark-mode-toggle] detectExistingDarkMode: computed check', {
+      bgColor,
+      bgLum: bgLum.toFixed(3),
+      textLum: textLum.toFixed(3),
+      contrast: contrast.toFixed(2),
+      detected,
+      conditions: {
+        bgDark: bgLum < 0.2,
+        goodContrast: contrast > 4,
+        textLighter: textLum > bgLum
+      }
+    });
+    
+    return detected;
   }
 
   function getLuminanceFromCssColor(value) {
@@ -442,9 +501,22 @@
     const effective = isValidMode(mode) ? mode : MODES.SMART;
     const final = state.settings?.enabled ? effective : MODES.OFF;
     
+    console.debug('[dark-mode-toggle] applyMode:', {
+      requested: mode,
+      effective,
+      final,
+      enabled: state.settings?.enabled,
+      previous: state.currentMode
+    });
+    
     setDocumentMode(document, final);
     state.currentMode = final;
     syncEmbeddedDocuments(final);
+    
+    console.debug('[dark-mode-toggle] applyMode: applied', final, {
+      hasAttribute: document.documentElement.hasAttribute('data-dmt-mode'),
+      attributeValue: document.documentElement.getAttribute('data-dmt-mode')
+    });
   }
 
   function setDocumentMode(targetDoc, mode) {
@@ -530,6 +602,11 @@
       if (!state.settings?.respectNativeDark) return;
       if (state.settings.siteOverrides?.[state.host]) return;
       
+      // only check if we're not currently applying dark mode
+      if (document.documentElement.hasAttribute('data-dmt-mode')) {
+        return;
+      }
+      
       const detected = detectExistingDarkMode();
       if (detected !== state.autoDisabled) {
         state.autoDisabled = detected;
@@ -610,8 +687,19 @@
 
   // main mode evaluation
   function evaluateAndApplyMode() {
-    if (!state.settings) return;
+    if (!state.settings) {
+      console.debug('[dark-mode-toggle] evaluateAndApplyMode: no settings');
+      return;
+    }
     const resolved = resolveMode();
+    console.debug('[dark-mode-toggle] evaluateAndApplyMode:', {
+      resolved: resolved.mode,
+      enabled: state.settings.enabled,
+      defaultMode: state.settings.defaultMode,
+      autoDisabled: state.autoDisabled,
+      host: state.host,
+      override: state.settings.siteOverrides?.[state.host]
+    });
     applyMode(resolved.mode);
   }
 
@@ -789,7 +877,15 @@
 
   // init
   function init() {
+    console.debug('[dark-mode-toggle] init: starting initialization');
     Settings.load();
+    console.debug('[dark-mode-toggle] init: settings loaded', {
+      enabled: state.settings?.enabled,
+      defaultMode: state.settings?.defaultMode,
+      respectNativeDark: state.settings?.respectNativeDark,
+      host: state.host
+    });
+    
     applyColorVariables();
     patchAttachShadow();
     ensureSmartStyle();
@@ -800,10 +896,12 @@
     registerMenuCommands();
     
     ready(() => {
+      console.debug('[dark-mode-toggle] init: DOM ready');
       scanExistingShadowRoots();
       evaluateAndApplyMode();
     });
     
+    console.debug('[dark-mode-toggle] init: initialization complete');
     return state;
   }
 
