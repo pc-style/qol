@@ -1,0 +1,26 @@
+{
+  "timestamp": "2025-11-11T03:16:02.761Z",
+  "method": "POST",
+  "url": "//chat/completions",
+  "headers": {
+    "host": "compete-wheel-telling-enrolled.trycloudflare.com",
+    "user-agent": "axios/1.13.2",
+    "content-length": "2995",
+    "accept": "application/json, text/plain, */*",
+    "accept-encoding": "gzip",
+    "authorization": "Bearer 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",
+    "cdn-loop": "cloudflare; loops=1; subreqs=1",
+    "cf-connecting-ip": "3.209.66.12",
+    "cf-ew-via": "15",
+    "cf-ipcountry": "US",
+    "cf-ray": "99caa0eb832bd701-IAD",
+    "cf-visitor": "{\"scheme\":\"https\"}",
+    "cf-warp-tag-id": "eb2c2fed-5f74-4de9-a7d2-bc1ef39f17f7",
+    "cf-worker": "trycloudflare.com",
+    "connection": "keep-alive",
+    "content-type": "application/json",
+    "x-forwarded-for": "3.209.66.12",
+    "x-forwarded-proto": "https"
+  },
+  "body": "{\"model\":\"gemini-2.5-flash-preview-05-20\",\"temperature\":0,\"messages\":[{\"role\":\"system\",\"content\":\"You are given a request from a user to a AI coding assistant, along with some files that the user is currently working on. Your task is to categorize the user's profession based on the request and the files.\\n\\nYou have the following categories at your disposal and each is given with a name and description of what it captures:\\n<category name=\\\"frontend_developer\\\">\\nThe user is a frontend developer.\\n</category>\\n\\n<category name=\\\"backend_developer\\\">\\nThe user is a backend developer.\\n</category>\\n\\n<category name=\\\"fullstack_developer\\\">\\nThe user is a fullstack developer.\\n</category>\\n\\n<category name=\\\"mobile_developer\\\">\\nThe user is a mobile developer.\\n</category>\\n\\n<category name=\\\"devops_engineer\\\">\\nThe user is a devops engineer.\\n</category>\\n\\n<category name=\\\"embedded_developer\\\">\\nThe user is an embedded developer.\\n</category>\\n\\n<category name=\\\"ai_developer\\\">\\nThe user is an AI or ML developer.\\n</category>\\n\\n<category name=\\\"game_developer\\\">\\nThe user is a game developer.\\n</category>\\n\\n<category name=\\\"dev_tool_engineer\\\">\\nThe user is a dev tool engineer.\\n</category>\\n\\n<category name=\\\"data_scientist\\\">\\nThe user is a data scientist.\\n</category>\\n\\n<category name=\\\"qa_engineer\\\">\\nThe user is a QA engineer.\\n</category>\\n\\n<category name=\\\"manager\\\">\\nThe user is a manager.\\n</category>\\n\\n<category name=\\\"designer\\\">\\nThe user is a designer.\\n</category>\\n\\n<category name=\\\"technical_writer\\\">\\nThe user is a technical writer.\\n</category>\\n\\n<category name=\\\"finance\\\">\\nThe user is a finance professional.\\n</category>\\n\\n<category name=\\\"legal\\\">\\nThe user is a legal professional.\\n</category>\\n\\n<category name=\\\"hr_professional\\\">\\nThe user is a HR professional.\\n</category>\\n\\n<category name=\\\"product_manager\\\">\\nThe user is a product manager.\\n</category>\\n\\nCarefully analyze the request and the files and then call the \\\"result\\\" tool to report the category name.\\n\\n\\nIf you cannot determine the user's profession, return the category name \\\"other\\\".\"},{\"role\":\"user\",\"content\":\"Please analyze the following request and then categorize the user's profession.\\n\\n<user_message>gil</user_message>\\n\\nHere are the files that the user is currently working on:\\n\"}],\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"result\",\"description\":\"Report the categorization result\",\"parameters\":{\"type\":\"object\",\"properties\":{\"category\":{\"type\":\"string\",\"enum\":[\"frontend_developer\",\"backend_developer\",\"fullstack_developer\",\"mobile_developer\",\"devops_engineer\",\"embedded_developer\",\"ai_developer\",\"game_developer\",\"dev_tool_engineer\",\"data_scientist\",\"qa_engineer\",\"manager\",\"designer\",\"technical_writer\",\"finance\",\"legal\",\"hr_professional\",\"product_manager\",\"other\"],\"description\":\"The classification result (category name)\"}},\"required\":[\"category\"]}}}],\"tool_choice\":\"auto\",\"extra_body\":{\"google\":{\"disable_thought_tag\":true}},\"stream\":true}"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "qol-userscripts",
+  "version": "1.0.0",
+  "description": "Quality of Life userscript framework",
+  "type": "module",
+  "scripts": {
+    "new:script": "node tools/new-script.js",
+    "check:scripts": "node tools/check-scripts.js",
+    "integrate": "node tools/integrate.js",
+    "build": "node tools/build.js",
+    "build:all": "npm run integrate && npm run build"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.0"
+  }
+}
+

@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-11-11T03:15:40.698Z",
+  "method": "GET",
+  "url": "/favicon.ico",
+  "headers": {
+    "host": "compete-wheel-telling-enrolled.trycloudflare.com",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+    "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+    "accept-encoding": "gzip",
+    "accept-language": "en-US,en;q=0.9",
+    "cdn-loop": "cloudflare; loops=1; subreqs=1",
+    "cf-connecting-ip": "212.87.229.47",
+    "cf-ew-via": "15",
+    "cf-ipcountry": "PL",
+    "cf-ray": "99caa0635726c04f-WAW",
+    "cf-visitor": "{\"scheme\":\"https\"}",
+    "cf-warp-tag-id": "eb2c2fed-5f74-4de9-a7d2-bc1ef39f17f7",
+    "cf-worker": "trycloudflare.com",
+    "connection": "keep-alive",
+    "priority": "u=1, i",
+    "referer": "https://compete-wheel-telling-enrolled.trycloudflare.com/",
+    "sec-ch-ua": "\"Google Chrome\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"macOS\"",
+    "sec-fetch-dest": "image",
+    "sec-fetch-mode": "no-cors",
+    "sec-fetch-site": "same-origin",
+    "x-forwarded-for": "212.87.229.47",
+    "x-forwarded-proto": "https"
+  },
+  "body": ""
+}

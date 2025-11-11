@@ -1,0 +1,26 @@
+{
+  "timestamp": "2025-11-11T03:16:00.189Z",
+  "method": "POST",
+  "url": "//chat/completions",
+  "headers": {
+    "host": "compete-wheel-telling-enrolled.trycloudflare.com",
+    "user-agent": "axios/1.13.2",
+    "content-length": "1656",
+    "accept": "application/json, text/plain, */*",
+    "accept-encoding": "gzip",
+    "authorization": "Bearer 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",
+    "cdn-loop": "cloudflare; loops=1; subreqs=1",
+    "cf-connecting-ip": "3.209.66.12",
+    "cf-ew-via": "15",
+    "cf-ipcountry": "US",
+    "cf-ray": "99caa0dcc069394c-WAW",
+    "cf-visitor": "{\"scheme\":\"https\"}",
+    "cf-warp-tag-id": "eb2c2fed-5f74-4de9-a7d2-bc1ef39f17f7",
+    "cf-worker": "trycloudflare.com",
+    "connection": "keep-alive",
+    "content-type": "application/json",
+    "x-forwarded-for": "3.209.66.12",
+    "x-forwarded-proto": "https"
+  },
+  "body": "{\"model\":\"gemini-2.5-flash-preview-05-20\",\"temperature\":0,\"messages\":[{\"role\":\"system\",\"content\":\"You are given a request from a user to a AI coding assistant, and your task is to categorize the user's natural language based on the request. If the user is likely copy/pasting code from another source, ignore that part of the request, and only judge the user's language based on the rest of the request.\\n\\nReport the language of the user in English, so for example you might return \\\"English\\\" or \\\"Spanish\\\" or \\\"French\\\" or \\\"German\\\" or \\\"Italian\\\" or \\\"Portuguese\\\" or \\\"Russian\\\" or \\\"Chinese\\\" or \\\"Japanese\\\" or \\\"Korean\\\" or \\\"Arabic\\\" or \\\"Hebrew\\\" or \\\"Turkish\\\" or \\\"Dutch\\\" or \\\"Polish\\\" or \\\"Romanian\\\" or \\\"Czech\\\" or \\\"Slovak\\\" or \\\"Hungarian\\\" or \\\"Bulgarian\\\" or \\\"Croatian\\\" or \\\"Serbian\\\" or \\\"Maltese\\\" or \\\"Estonian\\\" or \\\"Latvian\\\" or \\\"Lithuanian\\\" or \\\"Slovenian\\\" or \\\"Bosnian\\\" or \\\"Montenegrin\\\" or \\\"Albanian\\\" or \\\"Macedonian\\\".\\n\\nDo not categorize dialects or other variations of the language. Don't use abbreviations and don't use special characters.\\n\\nIf you cannot determine the user's language, return the category name \\\"Other\\\".\"},{\"role\":\"user\",\"content\":\"Please analyze the following request and then categorize the user's language.\\n<user_message>gil</user_message>\"}],\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"result\",\"description\":\"Report the language of the user's request\",\"parameters\":{\"type\":\"object\",\"properties\":{\"language\":{\"type\":\"string\",\"description\":\"The language of the user\"}},\"required\":[\"language\"]}}}],\"tool_choice\":\"auto\",\"extra_body\":{\"google\":{\"disable_thought_tag\":true}},\"stream\":true}"
+}
