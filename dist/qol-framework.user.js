@@ -1054,8 +1054,9 @@ var QoLFramework = (() => {
       state.commandPaletteList.querySelectorAll(".qol-command-script").forEach((item) => {
         const scriptId = item.dataset.scriptId;
         const header = item.querySelector(".qol-command-script-header");
-        header.addEventListener("click", (e) => {
-          if (e.target.closest(".qol-command-toggle")) {
+        const toggleBtn = header.querySelector(".qol-command-toggle");
+        if (toggleBtn) {
+          toggleBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             const script = state.scripts.get(scriptId);
             if (script) {
@@ -1064,14 +1065,18 @@ var QoLFramework = (() => {
               Toolbar.update();
               this.render();
             }
-          } else {
-            if (state.commandPaletteExpanded.has(scriptId)) {
-              state.commandPaletteExpanded.delete(scriptId);
-            } else {
-              state.commandPaletteExpanded.add(scriptId);
-            }
-            this.render();
+          });
+        }
+        header.addEventListener("click", (e) => {
+          if (e.target.closest(".qol-command-toggle")) {
+            return;
           }
+          if (state.commandPaletteExpanded.has(scriptId)) {
+            state.commandPaletteExpanded.delete(scriptId);
+          } else {
+            state.commandPaletteExpanded.add(scriptId);
+          }
+          this.render();
         });
       });
       state.commandPaletteList.querySelectorAll(".qol-command-item").forEach((item) => {

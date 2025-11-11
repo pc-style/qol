@@ -582,8 +582,9 @@ export const CommandPalette = {
       const scriptId = item.dataset.scriptId;
       const header = item.querySelector('.qol-command-script-header');
       
-      header.addEventListener('click', (e) => {
-        if (e.target.closest('.qol-command-toggle')) {
+      const toggleBtn = header.querySelector('.qol-command-toggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           const script = state.scripts.get(scriptId);
           if (script) {
@@ -592,15 +593,21 @@ export const CommandPalette = {
             Toolbar.update();
             this.render();
           }
-        } else {
-          // toggle expand
-          if (state.commandPaletteExpanded.has(scriptId)) {
-            state.commandPaletteExpanded.delete(scriptId);
-          } else {
-            state.commandPaletteExpanded.add(scriptId);
-          }
-          this.render();
+        });
+      }
+      
+      header.addEventListener('click', (e) => {
+        // don't toggle expand if clicking the toggle button
+        if (e.target.closest('.qol-command-toggle')) {
+          return;
         }
+        // toggle expand
+        if (state.commandPaletteExpanded.has(scriptId)) {
+          state.commandPaletteExpanded.delete(scriptId);
+        } else {
+          state.commandPaletteExpanded.add(scriptId);
+        }
+        this.render();
       });
     });
     
