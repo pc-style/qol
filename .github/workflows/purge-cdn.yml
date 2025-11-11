@@ -1,0 +1,23 @@
+name: Purge CDN Cache
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'dist/**'
+      - 'scripts/**'
+
+jobs:
+  purge-jsdelivr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Purge jsdelivr cache
+        uses: egad13/purge-jsdelivr-cache@v1
+        with:
+          url: |
+            https://cdn.jsdelivr.net/gh/pc-style/qol@latest/dist/qol-framework.user.js
+            https://cdn.jsdelivr.net/gh/pc-style/qol@latest/scripts/dark-mode-toggle.user.js
+            https://cdn.jsdelivr.net/gh/pc-style/qol@latest/scripts/custom-shortcuts-manager.user.js
+            https://cdn.jsdelivr.net/gh/pc-style/qol@latest/scripts/markdown-converter.user.js
+
