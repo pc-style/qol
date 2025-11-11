@@ -551,7 +551,7 @@ export const CommandPalette = {
           html += `
             <div class="qol-command-item qol-command-sub ${cmdSelected}" data-index="${cmdIndex}" data-command-id="${escapeHtml(cmd.id)}">
               <span class="qol-command-icon">⚙</span>
-              <span class="qol-command-label">${escapeHtml(script.name)}: ${escapeHtml(cmd.label)}</span>
+              <span class="qol-command-label">${escapeHtml(cmd.label)}</span>
             </div>
           `;
         }
