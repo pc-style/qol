@@ -576,11 +576,12 @@ var QoLFramework = (() => {
       const fields = Object.entries(script.settings).map(([key, schema]) => {
         const value = script.getSetting?.(key) ?? schema.default;
         const label = schema.label || key;
+        const fieldId = `qol-${script.id}-${key}`;
         if (schema.type === "toggle") {
           return `
           <div class="qol-form-group row">
             <label>
-              <input type="checkbox" name="${escapeHtml(key)}" ${value ? "checked" : ""} />
+              <input type="checkbox" id="${escapeHtml(fieldId)}" name="${escapeHtml(key)}" ${value ? "checked" : ""} />
               <span>${escapeHtml(label)}</span>
             </label>
           </div>
@@ -588,15 +589,15 @@ var QoLFramework = (() => {
         } else if (schema.type === "text") {
           return `
           <div class="qol-form-group">
-            <label>${escapeHtml(label)}</label>
-            <input type="text" name="${escapeHtml(key)}" value="${escapeHtml(String(value || ""))}" placeholder="${escapeHtml(schema.placeholder || "")}" />
+            <label for="${escapeHtml(fieldId)}">${escapeHtml(label)}</label>
+            <input type="text" id="${escapeHtml(fieldId)}" name="${escapeHtml(key)}" value="${escapeHtml(String(value || ""))}" placeholder="${escapeHtml(schema.placeholder || "")}" />
           </div>
         `;
         } else if (schema.type === "textarea") {
           return `
           <div class="qol-form-group">
-            <label>${escapeHtml(label)}</label>
-            <textarea name="${escapeHtml(key)}" placeholder="${escapeHtml(schema.placeholder || "")}">${escapeHtml(String(value || ""))}</textarea>
+            <label for="${escapeHtml(fieldId)}">${escapeHtml(label)}</label>
+            <textarea id="${escapeHtml(fieldId)}" name="${escapeHtml(key)}" placeholder="${escapeHtml(schema.placeholder || "")}">${escapeHtml(String(value || ""))}</textarea>
           </div>
         `;
         } else if (schema.type === "select") {
@@ -608,15 +609,15 @@ var QoLFramework = (() => {
           }).join("");
           return `
           <div class="qol-form-group">
-            <label>${escapeHtml(label)}</label>
-            <select name="${escapeHtml(key)}">${options}</select>
+            <label for="${escapeHtml(fieldId)}">${escapeHtml(label)}</label>
+            <select id="${escapeHtml(fieldId)}" name="${escapeHtml(key)}">${options}</select>
           </div>
         `;
         } else if (schema.type === "color") {
           return `
           <div class="qol-form-group">
-            <label>${escapeHtml(label)}</label>
-            <input type="color" name="${escapeHtml(key)}" value="${escapeHtml(String(value || "#6366f1"))}" />
+            <label for="${escapeHtml(fieldId)}">${escapeHtml(label)}</label>
+            <input type="color" id="${escapeHtml(fieldId)}" name="${escapeHtml(key)}" value="${escapeHtml(String(value || "#6366f1"))}" />
           </div>
         `;
         }
