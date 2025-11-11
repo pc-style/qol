@@ -323,14 +323,105 @@ export const STYLES = `
   margin-top: 0;
 }
 
+.qol-command-script {
+  margin: 4px 0;
+  border-radius: var(--qol-radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.qol-command-script:hover,
+.qol-command-script.selected {
+  background: var(--qol-bg-soft);
+}
+
+.qol-command-script.selected {
+  background: var(--qol-accent-soft);
+}
+
+.qol-command-script-header {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.qol-command-toggle {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 20px;
+  position: relative;
+}
+
+.qol-toggle-switch {
+  width: 32px;
+  height: 18px;
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 9px;
+  position: relative;
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+
+.qol-toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s ease;
+}
+
+.qol-toggle-switch.enabled {
+  background: var(--qol-accent);
+}
+
+.qol-toggle-switch.enabled::after {
+  transform: translateX(14px);
+}
+
+.qol-command-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.qol-command-expand {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--qol-text-soft);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.qol-command-expand.expanded {
+  transform: rotate(90deg);
+}
+
 .qol-command-item {
   padding: 10px 12px;
+  padding-left: 48px;
   border-radius: var(--qol-radius-sm);
   cursor: pointer;
   transition: background 0.15s ease;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.qol-command-item.qol-command-sub {
+  padding-left: 54px;
 }
 
 .qol-command-item:hover,
@@ -345,6 +436,7 @@ export const STYLES = `
 .qol-command-label {
   color: var(--qol-text);
   font-size: 14px;
+  flex: 1;
 }
 
 .qol-command-empty {

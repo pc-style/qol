@@ -1042,6 +1042,44 @@
     init,
     destroy,
     
+    commands: [
+      {
+        id: 'toggle',
+        label: 'Toggle',
+        action: () => toggleGlobal()
+      },
+      {
+        id: 'cycle-mode',
+        label: 'Cycle Mode',
+        action: () => cycleMode()
+      },
+      {
+        id: 'override-manager',
+        label: 'Override Manager',
+        action: () => openOverrideManager()
+      },
+      {
+        id: 'override-smart',
+        label: 'Set Override (Smart)',
+        action: () => addSiteOverride(null, MODES.SMART, 'command')
+      },
+      {
+        id: 'override-filter',
+        label: 'Set Override (Filter)',
+        action: () => addSiteOverride(null, MODES.FILTER, 'command')
+      },
+      {
+        id: 'override-off',
+        label: 'Set Override (Off)',
+        action: () => addSiteOverride(null, MODES.OFF, 'command')
+      },
+      {
+        id: 'remove-override',
+        label: 'Remove Override',
+        action: () => removeSiteOverride(null)
+      }
+    ],
+    
     onToggle(enabled) {
       state.settings.enabled = enabled;
       Settings.save();

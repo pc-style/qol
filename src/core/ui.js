@@ -17,7 +17,9 @@ const state = {
   commandPaletteOpen: false,
   commandPaletteCommands: [],
   commandPaletteFiltered: [],
-  commandPaletteSelected: 0
+  commandPaletteSelected: 0,
+  commandPaletteExpanded: new Set(),
+  commandPaletteFlatItems: []
 };
 
 // inject styles
@@ -71,13 +73,15 @@ export const Toolbar = {
     }).join('');
 
     const settingsBtn = '<button type="button" data-act="settings" title="Settings">⚙</button>';
+    const commandBtn = '<button type="button" data-act="command" title="Command Palette (Ctrl+K)">⌘</button>';
     
-    state.toolbar.innerHTML = buttons + settingsBtn;
+    state.toolbar.innerHTML = buttons + commandBtn + settingsBtn;
     
     // attach click handlers
     state.toolbar.addEventListener('click', (e) => {
       const scriptBtn = e.target.closest('button[data-script-id]');
       const settingsBtn = e.target.closest('button[data-act="settings"]');
+      const commandBtn = e.target.closest('button[data-act="command"]');
       
       if (scriptBtn) {
         const scriptId = scriptBtn.dataset.scriptId;
@@ -87,6 +91,8 @@ export const Toolbar = {
           script.onToggle?.(script.enabled);
           this.update();
         }
+      } else if (commandBtn) {
+        CommandPalette.open();
       } else if (settingsBtn) {
         Modal.open();
       }
@@ -409,28 +415,17 @@ export const CommandPalette = {
   },
 
   collectCommands() {
-    const commands = [];
+    const scripts = [];
     
-    // add script toggle commands
+    // organize by scripts
     for (const script of state.scripts.values()) {
-      commands.push({
-        id: `toggle-${script.id}`,
-        label: `${script.enabled ? 'Disable' : 'Enable'} ${script.name}`,
-        category: 'Scripts',
-        action: () => {
-          script.enabled = !script.enabled;
-          script.onToggle?.(script.enabled);
-          Toolbar.update();
-          this.close();
-        }
-      });
+      const scriptCommands = [];
       
       // add script settings command
       if (script.settings && Object.keys(script.settings).length > 0) {
-        commands.push({
+        scriptCommands.push({
           id: `settings-${script.id}`,
-          label: `Open ${script.name} Settings`,
-          category: 'Scripts',
+          label: `Settings`,
           action: () => {
             Modal.open(script.id);
             this.close();
@@ -441,9 +436,8 @@ export const CommandPalette = {
       // add custom commands from script
       if (script.commands && Array.isArray(script.commands)) {
         for (const cmd of script.commands) {
-          commands.push({
+          scriptCommands.push({
             ...cmd,
-            category: cmd.category || script.name,
             action: () => {
               cmd.action?.();
               this.close();
@@ -451,21 +445,28 @@ export const CommandPalette = {
           });
         }
       }
+      
+      scripts.push({
+        id: script.id,
+        name: script.name,
+        enabled: script.enabled !== false,
+        commands: scriptCommands,
+        script: script
+      });
     }
     
     // add global commands
-    commands.push({
+    const globalCommands = [{
       id: 'settings-all',
       label: 'Open Settings',
-      category: 'General',
       action: () => {
         Modal.open();
         this.close();
       }
-    });
+    }];
     
-    state.commandPaletteCommands = commands;
-    return commands;
+    state.commandPaletteCommands = { scripts, globalCommands };
+    return state.commandPaletteCommands;
   },
 
   filter() {
@@ -474,10 +475,29 @@ export const CommandPalette = {
     if (!query) {
       state.commandPaletteFiltered = state.commandPaletteCommands;
     } else {
-      state.commandPaletteFiltered = state.commandPaletteCommands.filter(cmd => {
-        const searchText = `${cmd.label} ${cmd.category}`.toLowerCase();
-        return searchText.includes(query);
-      });
+      // filter scripts and their commands
+      const filteredScripts = state.commandPaletteCommands.scripts.filter(script => {
+        const nameMatch = script.name.toLowerCase().includes(query);
+        const commandMatch = script.commands.some(cmd => 
+          cmd.label.toLowerCase().includes(query)
+        );
+        return nameMatch || commandMatch;
+      }).map(script => ({
+        ...script,
+        commands: script.commands.filter(cmd => 
+          cmd.label.toLowerCase().includes(query) || 
+          script.name.toLowerCase().includes(query)
+        )
+      }));
+      
+      const filteredGlobal = state.commandPaletteCommands.globalCommands.filter(cmd =>
+        cmd.label.toLowerCase().includes(query)
+      );
+      
+      state.commandPaletteFiltered = {
+        scripts: filteredScripts,
+        globalCommands: filteredGlobal
+      };
     }
     
     state.commandPaletteSelected = 0;
@@ -487,29 +507,67 @@ export const CommandPalette = {
   render() {
     if (!state.commandPaletteList) return;
     
-    if (state.commandPaletteFiltered.length === 0) {
+    const { scripts, globalCommands } = state.commandPaletteFiltered;
+    
+    if (scripts.length === 0 && globalCommands.length === 0) {
       state.commandPaletteList.innerHTML = '<div class="qol-command-empty">No commands found</div>';
       return;
     }
     
-    // group by category
-    const grouped = {};
-    for (const cmd of state.commandPaletteFiltered) {
-      if (!grouped[cmd.category]) {
-        grouped[cmd.category] = [];
+    // build flat list for navigation
+    const flatItems = [];
+    let html = '';
+    
+    // render scripts
+    for (const script of scripts) {
+      const isExpanded = state.commandPaletteExpanded.has(script.id);
+      const hasCommands = script.commands.length > 0;
+      
+      // script header
+      const scriptIndex = flatItems.length;
+      flatItems.push({ type: 'script', script });
+      const scriptSelected = scriptIndex === state.commandPaletteSelected ? 'selected' : '';
+      
+      html += `
+        <div class="qol-command-script ${scriptSelected}" data-index="${scriptIndex}" data-script-id="${escapeHtml(script.id)}">
+          <div class="qol-command-script-header">
+            <button type="button" class="qol-command-toggle" data-script-id="${escapeHtml(script.id)}" aria-label="Toggle ${escapeHtml(script.name)}">
+              <span class="qol-toggle-switch ${script.enabled ? 'enabled' : ''}"></span>
+            </button>
+            <span class="qol-command-icon">📄</span>
+            <span class="qol-command-label">${escapeHtml(script.name)}</span>
+            ${hasCommands ? `<span class="qol-command-expand ${isExpanded ? 'expanded' : ''}">▶</span>` : ''}
+          </div>
+        </div>
+      `;
+      
+      // script commands (if expanded)
+      if (isExpanded && hasCommands) {
+        for (const cmd of script.commands) {
+          const cmdIndex = flatItems.length;
+          flatItems.push({ type: 'command', command: cmd, script });
+          const cmdSelected = cmdIndex === state.commandPaletteSelected ? 'selected' : '';
+          
+          html += `
+            <div class="qol-command-item qol-command-sub ${cmdSelected}" data-index="${cmdIndex}" data-command-id="${escapeHtml(cmd.id)}">
+              <span class="qol-command-icon">⚙</span>
+              <span class="qol-command-label">${escapeHtml(script.name)}: ${escapeHtml(cmd.label)}</span>
+            </div>
+          `;
+        }
       }
-      grouped[cmd.category].push(cmd);
     }
     
-    let html = '';
-    for (const [category, cmds] of Object.entries(grouped)) {
-      html += `<div class="qol-command-category">${escapeHtml(category)}</div>`;
-      for (let i = 0; i < cmds.length; i++) {
-        const cmd = cmds[i];
-        const globalIndex = state.commandPaletteFiltered.indexOf(cmd);
-        const selected = globalIndex === state.commandPaletteSelected ? 'selected' : '';
+    // render global commands
+    if (globalCommands.length > 0) {
+      html += `<div class="qol-command-category">General</div>`;
+      for (const cmd of globalCommands) {
+        const cmdIndex = flatItems.length;
+        flatItems.push({ type: 'command', command: cmd });
+        const cmdSelected = cmdIndex === state.commandPaletteSelected ? 'selected' : '';
+        
         html += `
-          <div class="qol-command-item ${selected}" data-index="${globalIndex}" data-command-id="${escapeHtml(cmd.id)}">
+          <div class="qol-command-item ${cmdSelected}" data-index="${cmdIndex}" data-command-id="${escapeHtml(cmd.id)}">
             <span class="qol-command-label">${escapeHtml(cmd.label)}</span>
           </div>
         `;
@@ -517,8 +575,35 @@ export const CommandPalette = {
     }
     
     state.commandPaletteList.innerHTML = html;
+    state.commandPaletteFlatItems = flatItems;
     
     // attach click handlers
+    state.commandPaletteList.querySelectorAll('.qol-command-script').forEach(item => {
+      const scriptId = item.dataset.scriptId;
+      const header = item.querySelector('.qol-command-script-header');
+      
+      header.addEventListener('click', (e) => {
+        if (e.target.closest('.qol-command-toggle')) {
+          e.stopPropagation();
+          const script = state.scripts.get(scriptId);
+          if (script) {
+            script.enabled = !script.enabled;
+            script.onToggle?.(script.enabled);
+            Toolbar.update();
+            this.render();
+          }
+        } else {
+          // toggle expand
+          if (state.commandPaletteExpanded.has(scriptId)) {
+            state.commandPaletteExpanded.delete(scriptId);
+          } else {
+            state.commandPaletteExpanded.add(scriptId);
+          }
+          this.render();
+        }
+      });
+    });
+    
     state.commandPaletteList.querySelectorAll('.qol-command-item').forEach(item => {
       item.addEventListener('click', () => {
         const index = parseInt(item.dataset.index);
@@ -527,7 +612,7 @@ export const CommandPalette = {
     });
     
     // scroll selected into view
-    const selectedEl = state.commandPaletteList.querySelector('.qol-command-item.selected');
+    const selectedEl = state.commandPaletteList.querySelector('.selected');
     if (selectedEl) {
       selectedEl.scrollIntoView({ block: 'nearest' });
     }
@@ -536,12 +621,15 @@ export const CommandPalette = {
   handleKeyDown(e) {
     if (!state.commandPaletteOpen) return;
     
+    const flatItems = state.commandPaletteFlatItems || [];
+    const maxIndex = flatItems.length - 1;
+    
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
         state.commandPaletteSelected = Math.min(
           state.commandPaletteSelected + 1,
-          state.commandPaletteFiltered.length - 1
+          maxIndex
         );
         this.render();
         break;
@@ -550,6 +638,26 @@ export const CommandPalette = {
         e.preventDefault();
         state.commandPaletteSelected = Math.max(state.commandPaletteSelected - 1, 0);
         this.render();
+        break;
+        
+      case 'ArrowRight':
+        e.preventDefault();
+        // expand if on script header
+        const currentItem = flatItems[state.commandPaletteSelected];
+        if (currentItem?.type === 'script' && !state.commandPaletteExpanded.has(currentItem.script.id)) {
+          state.commandPaletteExpanded.add(currentItem.script.id);
+          this.render();
+        }
+        break;
+        
+      case 'ArrowLeft':
+        e.preventDefault();
+        // collapse if on script header
+        const currentItem2 = flatItems[state.commandPaletteSelected];
+        if (currentItem2?.type === 'script' && state.commandPaletteExpanded.has(currentItem2.script.id)) {
+          state.commandPaletteExpanded.delete(currentItem2.script.id);
+          this.render();
+        }
         break;
         
       case 'Enter':
@@ -565,9 +673,21 @@ export const CommandPalette = {
   },
 
   execute(index) {
-    const cmd = state.commandPaletteFiltered[index];
-    if (cmd && cmd.action) {
-      cmd.action();
+    const flatItems = state.commandPaletteFlatItems || [];
+    const item = flatItems[index];
+    
+    if (!item) return;
+    
+    if (item.type === 'script') {
+      // toggle expand on script
+      if (state.commandPaletteExpanded.has(item.script.id)) {
+        state.commandPaletteExpanded.delete(item.script.id);
+      } else {
+        state.commandPaletteExpanded.add(item.script.id);
+      }
+      this.render();
+    } else if (item.type === 'command' && item.command?.action) {
+      item.command.action();
     }
   },
 
@@ -579,6 +699,14 @@ export const CommandPalette = {
     state.commandPaletteFiltered = state.commandPaletteCommands;
     state.commandPaletteSelected = 0;
     state.commandPaletteOpen = true;
+    
+    // expand all by default
+    state.commandPaletteExpanded.clear();
+    for (const script of state.commandPaletteCommands.scripts) {
+      if (script.commands.length > 0) {
+        state.commandPaletteExpanded.add(script.id);
+      }
+    }
     
     this.render();
     state.commandPalette.classList.add('show');
@@ -597,6 +725,7 @@ export const CommandPalette = {
     
     state.commandPaletteOpen = false;
     state.commandPalette.classList.remove('show');
+    state.commandPaletteExpanded.clear();
     
     if (state.commandPaletteInput) {
       state.commandPaletteInput.value = '';
